@@ -1,0 +1,2 @@
+ENV TWITTER_USERNAME=your_username
+ENV TWITTER_PASSWORD=your_password
