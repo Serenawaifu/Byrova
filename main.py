@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 from selenium.webdriver.chrome.options import Options
+import os  # Import the os module for environment variables
 
 # Set up Chrome options to run headlessly
 options = Options()
@@ -16,13 +17,23 @@ def login_to_twitter():
     driver.get("https://twitter.com/login")
     time.sleep(2)
 
+    # Get credentials from environment variables
+    twitter_username = os.getenv("TWITTER_USERNAME")
+    twitter_password = os.getenv("TWITTER_PASSWORD")
+
+    if not twitter_username or not twitter_password:
+        print("Error: Missing Twitter credentials in environment variables.")
+        driver.quit()
+        return
+
     # Find the login form fields and enter your credentials
     username = driver.find_element("name", "text")
+    username.send_keys(twitter_username)
+    username.send_keys(Keys.RETURN)
+    time.sleep(2)
+
     password = driver.find_element("name", "password")
-
-    username.send_keys("NyrovaAI")
-    password.send_keys("DFtB@5475")
-
+    password.send_keys(twitter_password)
     password.send_keys(Keys.RETURN)
     time.sleep(3)
 
@@ -36,6 +47,7 @@ def main():
     login_to_twitter()
     tweet_message("Automated tweet using Selenium! #AstraAI #Crypto")
     time.sleep(5)
+    driver.quit()  # Close the browser after execution
 
 if __name__ == "__main__":
     main()
