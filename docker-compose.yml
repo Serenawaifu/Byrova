@@ -1,0 +1,12 @@
+version: '3'
+services:
+  twitter-bot:
+    build: .
+    environment:
+      - TWITTER_USERNAME=${TWITTER_USERNAME}
+      - TWITTER_PASSWORD=${TWITTER_PASSWORD}
+      - TWEET_DELAY=3600
+      - MAX_RETRIES=3
+    volumes:
+      - .:/app
+    restart: unless-stopped
