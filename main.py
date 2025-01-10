@@ -1,17 +1,3 @@
-# config.py
-from pydantic import BaseSettings
-from typing import Optional
-
-class Settings(BaseSettings):
-    TWITTER_USERNAME: str
-    TWITTER_PASSWORD: str
-    TWEET_DELAY: int = 3600  # Default 1 hour delay between tweets
-    MAX_RETRIES: int = 3
-
-    class Config:
-        env_file = ".env"
-
-# twitter_bot.py
 import logging
 import random
 import time
@@ -25,7 +11,17 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     ElementClickInterceptedException
 )
-from config import Settings
+from pydantic_settings import BaseSettings  # Updated import
+
+# Settings class
+class Settings(BaseSettings):
+    TWITTER_USERNAME: str
+    TWITTER_PASSWORD: str
+    TWEET_DELAY: int = 3600
+    MAX_RETRIES: int = 3
+
+    class Config:
+        env_file = ".env"
 
 # Configure logging
 logging.basicConfig(
@@ -42,35 +38,19 @@ class TwitterBot:
     def setup_driver(self):
         """Configure and initialize the Chrome WebDriver with enhanced privacy."""
         options = webdriver.ChromeOptions()
-        
-        # Enhanced privacy and security options
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-blink-features=AutomationControlled')
         
-        # Random user agent to avoid detection
+        # Random user agent
         user_agents = [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
         ]
         options.add_argument(f'user-agent={random.choice(user_agents)}')
         
         self.driver = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.driver, 10)
-
-    def safe_find_and_click(self, by, value, timeout=10):
-        """Safely find and click elements with retry logic."""
-        try:
-            element = self.wait.until(
-                EC.element_to_be_clickable((by, value))
-            )
-            element.click()
-            return True
-        except (TimeoutException, ElementClickInterceptedException) as e:
-            logger.error(f"Error clicking element: {e}")
-            return False
 
     def login(self):
         """Login to Twitter with improved error handling and security."""
@@ -131,7 +111,7 @@ class TwitterBot:
             except Exception as e:
                 logger.error(f"Error posting tweet (attempt {attempt + 1}/{self.settings.MAX_RETRIES}): {e}")
                 if attempt < self.settings.MAX_RETRIES - 1:
-                    time.sleep(random.uniform(1, 3))  # Random delay between retries
+                    time.sleep(random.uniform(1, 3))
                     continue
                 return False
 
@@ -143,17 +123,18 @@ class TwitterBot:
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
 
-# main.py
 def main():
     bot = TwitterBot()
     try:
         if bot.login():
-            # Example tweet with hashtags
             tweet_text = "Exploring the future of AI and crypto! 🚀 #AstraAI #Crypto #Web3"
             bot.post_tweet(tweet_text)
-            time.sleep(random.uniform(2, 5))  # Random delay after posting
+            time.sleep(random.uniform(2, 5))
     finally:
         bot.cleanup()
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
