@@ -25,7 +25,6 @@ class Settings(BaseSettings):
         "extra": "allow"
     }
 
-# Rest of the code remains exactly the same...
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -41,9 +40,16 @@ class TwitterBot:
     def setup_driver(self):
         """Configure and initialize the Chrome WebDriver with enhanced privacy."""
         options = webdriver.ChromeOptions()
+        
+        # Required for running Chrome in container
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--window-size=1920,1080')
+        options.add_argument('--disable-features=VizDisplayCompositor')
+        options.add_argument('--disable-extensions')
+        options.add_argument('--disable-software-rasterizer')
         
         # Random user agent
         user_agents = [
