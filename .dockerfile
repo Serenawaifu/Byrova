@@ -1,21 +1,18 @@
-# Use Python 3.11-slim as the base image
-FROM python:3.11-slim
+# Use Python 3.12 slim base image
+FROM python:3.12-slim
 
-# Install system dependencies for Playwright and Chromium
-RUN apt-get update && apt-get install -y wget curl gnupg libnss3 libatk1.0-0 \
-    libatk-bridge2.0-0 libcups2 libxcomposite1 libxrandr2 libxdamage1 libxkbcommon0 \
-    libgbm1 libpango-1.0-0 libpangocairo-1.0-0 libgtk-3-0 libx11-xcb1 libxcb-dri3-0 \
-    libdrm2 libasound2 unzip && apt-get clean
+# Install system dependencies for Playwright and headless browser support
+RUN apt-get update && apt-get install -y wget curl gnupg2 libgbm-dev
 
-# Install Playwright and Python dependencies
-RUN pip install --no-cache-dir playwright==1.40.0 python-dotenv
-RUN playwright install --with-deps
+# Install Playwright dependencies and browsers
+RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m playwright install --with-deps
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the application files to the container
+# Copy the entire project code into the container
 COPY . .
 
-# Run the bot (use main.py)
+# Set the command to run your bot script
 CMD ["python", "main.py"]
