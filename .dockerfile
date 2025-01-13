@@ -17,9 +17,5 @@ WORKDIR /app
 # Copy application files
 COPY . .
 
-# Expose shared memory for stability
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN mkdir /tmp/browser && chmod -R 1777 /tmp/browser
-
 # Run the bot
-CMD ["python", "twitter_bot.py"]
+CMD ["python", "main.py"]
