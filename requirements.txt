@@ -1,2 +1,2 @@
-playwright
-python-dotenv
+playwright==1.28.1
+python-dotenv==1.0.0
