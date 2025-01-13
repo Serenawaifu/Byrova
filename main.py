@@ -1,9 +1,13 @@
 from playwright.sync_api import sync_playwright
 import os
 import time
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def login_to_twitter(page):
-    page.goto("https://twitter.com/login")
+    page.goto("https://twitter.com/login", timeout=60000)
     time.sleep(3)
 
     # Fill in username
@@ -17,7 +21,7 @@ def login_to_twitter(page):
     time.sleep(3)
 
 def tweet_message(page, message):
-    page.goto("https://twitter.com/home")
+    page.goto("https://twitter.com/home", timeout=60000)
     time.sleep(3)
 
     # Find the tweet box and post a message
@@ -28,14 +32,21 @@ def main():
     try:
         # Start Playwright
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)  # Use headless mode
+            # Launch browser in headless mode
+            browser = p.chromium.launch(
+                headless=True,  # Enable headless mode
+                args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+            )
             context = browser.new_context()
             page = context.new_page()
 
             # Log in and tweet
             login_to_twitter(page)
-            tweet_message(page, "Automated tweet using Playwright! #AstraAI #Crypto")
+            tweet_message(page, "Automated tweet using Playwright on Railway! #Crypto #Playwright")
             print("Tweet posted successfully!")
+
+            # Clean up
+            browser.close()
     except Exception as e:
         print(f"Error occurred: {e}")
 
