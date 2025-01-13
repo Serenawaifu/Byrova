@@ -2,6 +2,8 @@ import logging
 import random
 import time
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -25,49 +27,26 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class TwitterBot:
-    def __init__(self, browser_type='chrome'):
-        """
-        Initialize bot with specified browser type
-        browser_type can be 'chrome', 'firefox', 'safari', 'edge'
-        """
+    def __init__(self):
         self.settings = Settings()
-        self.browser_type = browser_type.lower()
         self.setup_driver()
 
     def setup_driver(self):
-        """Setup WebDriver for various browsers"""
+        """Configure and initialize the Chrome WebDriver for Railway"""
         try:
-            if self.browser_type == 'chrome':
-                options = webdriver.ChromeOptions()
-                options.add_argument('--start-maximized')
-                options.add_argument('--disable-extensions')
-                self.driver = webdriver.Chrome(options=options)
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+            options.add_argument('--disable-gpu')
+            options.add_argument('--window-size=1920,1080')
+            options.add_argument('--disable-notifications')
             
-            elif self.browser_type == 'firefox':
-                options = webdriver.FirefoxOptions()
-                self.driver = webdriver.Firefox(options=options)
+            # For Railway's environment
+            self.driver = webdriver.Chrome(options=options)
             
-            elif self.browser_type == 'safari':
-                self.driver = webdriver.Safari()
-            
-            elif self.browser_type == 'edge':
-                options = webdriver.EdgeOptions()
-                self.driver = webdriver.Edge(options=options)
-            
-            else:
-                raise ValueError(f"Unsupported browser type: {self.browser_type}")
-
-            # Set up mobile emulation if needed
-            if self.browser_type == 'chrome':
-                mobile_emulation = {
-                    "deviceMetrics": { "width": 360, "height": 640, "pixelRatio": 3.0 },
-                    "userAgent": "Mozilla/5.0 (Linux; Android 10; SM-A205U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
-                }
-                options.add_experimental_option("mobileEmulation", mobile_emulation)
-
-            self.driver.set_window_size(1920, 1080)  # Default to desktop size
             self.wait = WebDriverWait(self.driver, 10)
-            logger.info(f"Successfully initialized {self.browser_type} browser")
+            logger.info("Successfully initialized Chrome browser")
             
         except Exception as e:
             logger.error(f"Failed to initialize browser: {e}")
@@ -146,8 +125,7 @@ class TwitterBot:
             logger.error(f"Error during cleanup: {e}")
 
 def main():
-    # You can change the browser type here
-    bot = TwitterBot(browser_type='chrome')  # or 'firefox', 'safari', 'edge'
+    bot = TwitterBot()
     try:
         if bot.login():
             tweet_text = "Exploring the future of AI and crypto! 🚀 #AstraAI #Crypto #Web3"
