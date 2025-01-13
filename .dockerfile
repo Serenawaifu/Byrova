@@ -7,12 +7,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     xvfb \
     curl \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    chromium \
+    chromium-driver
 
 # Set up working directory
 WORKDIR /app
@@ -24,8 +20,10 @@ RUN pip install -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
-# Set display port
+# Set display port and Chrome paths
 ENV DISPLAY=:99
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
 # Run the bot
 CMD ["python", "main.py"]
