@@ -8,20 +8,4 @@ RUN apt-get update && apt-get install -y wget gnupg2 curl unzip \
     && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && dpkg -i google-chrome-stable_current_amd64.deb \
     && apt-get -y -f install \
-    && wget -q "https://chromedriver.storage.googleapis.com/131.0.6778.265/chromedriver_linux64.zip" -O chromedriver.zip \
-    && unzip chromedriver.zip \
-    && mv chromedriver /usr/local/bin \
-    && chmod +x /usr/local/bin/chromedriver
-
-# Set the working directory inside the container
-WORKDIR /app
-
-# Copy the requirements.txt file and install Python dependencies
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-
-# Copy the rest of the bot files into the container
-COPY . .
-
-# Set the command to run your bot
-CMD ["python", "twitter_bot.py"]
+    && wget -q "https://chromedriver.storage.googleapis.com/131.0.6778.265/chromedriver_linux64.zip"
