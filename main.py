@@ -1,54 +1,51 @@
-from playwright.sync_api import sync_playwright
 import os
-import time
 from dotenv import load_dotenv
+from playwright.sync_api import sync_playwright
+import time
 
 # Load environment variables
 load_dotenv()
 
-def login_to_twitter(page):
-    page.goto("https://twitter.com/login", timeout=60000)
-    time.sleep(3)
+TWITTER_USERNAME = os.getenv("TWITTER_USERNAME")
+TWITTER_PASSWORD = os.getenv("TWITTER_PASSWORD")
 
-    # Fill in username
-    page.fill("input[name='text']", os.getenv("TWITTER_USERNAME"))
-    page.keyboard.press("Enter")
+# Ensure credentials are loaded
+if not TWITTER_USERNAME or not TWITTER_PASSWORD:
+    raise ValueError("Twitter credentials are missing from the .env file!")
+
+def login_to_twitter(page):
+    # Navigate to Twitter login page
+    page.goto("https://twitter.com/login")
     time.sleep(2)
 
-    # Fill in password
-    page.fill("input[name='password']", os.getenv("TWITTER_PASSWORD"))
-    page.keyboard.press("Enter")
+    # Find and fill in the username and password fields
+    page.fill("input[name='text']", TWITTER_USERNAME)
+    page.fill("input[name='password']", TWITTER_PASSWORD)
+    
+    # Submit the form
+    page.click("div[data-testid='LoginForm_Login_Button']")
     time.sleep(3)
 
 def tweet_message(page, message):
-    page.goto("https://twitter.com/home", timeout=60000)
-    time.sleep(3)
-
-    # Find the tweet box and post a message
-    page.locator("div[aria-label='Tweet text']").fill(message)
-    page.locator("div[data-testid='tweetButton']").click()
+    # Find the tweet box and type the message
+    page.fill("div[aria-label='Tweet text']", message)
+    
+    # Click the tweet button
+    page.click("div[data-testid='tweetButton']")
+    time.sleep(2)
 
 def main():
-    try:
-        # Start Playwright
-        with sync_playwright() as p:
-            # Launch browser in headless mode
-            browser = p.chromium.launch(
-                headless=True,  # Enable headless mode
-                args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
-            )
-            context = browser.new_context()
-            page = context.new_page()
+    with sync_playwright() as p:
+        # Launch the browser in headless mode
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
 
-            # Log in and tweet
+        try:
             login_to_twitter(page)
-            tweet_message(page, "Automated tweet using Playwright on Railway! #Crypto #Playwright")
-            print("Tweet posted successfully!")
-
-            # Clean up
+            tweet_message(page, "Automated tweet using Playwright! #AstraAI #Crypto")
+        finally:
+            # Close the browser after operation
             browser.close()
-    except Exception as e:
-        print(f"Error occurred: {e}")
 
 if __name__ == "__main__":
     main()
